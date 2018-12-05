@@ -54,7 +54,7 @@ fn collect_guard_minutes(events: &Vec<GuardShiftEvent>) -> HashMap<usize, Vec<us
             FallAsleep => {
                 sleep_start_option = Some(event.timestamp);
             }
-            WakeUp | BeginShift => {
+            WakeUp | BeginShift(_) => {
                 if let Some(sleep_start) = sleep_start_option {
                     if !guard_minutes.contains_key(&guard_id) {
                         let empty_minutes: Vec<usize> = core::iter::repeat(0).take(60).collect();
@@ -67,8 +67,11 @@ fn collect_guard_minutes(events: &Vec<GuardShiftEvent>) -> HashMap<usize, Vec<us
                         minute_iter += chrono::Duration::minutes(1);
                     }
                 }
+                guard_id = match event.event_type {
+                    BeginShift(new_guard_id) => new_guard_id,
+                    _ => guard_id,
+                };
                 sleep_start_option = None;
-                guard_id = event.guard_id;
             }
         };
     }
@@ -77,7 +80,7 @@ fn collect_guard_minutes(events: &Vec<GuardShiftEvent>) -> HashMap<usize, Vec<us
 
 #[derive(Debug)]
 enum GuardShiftEventType {
-    BeginShift,
+    BeginShift(usize),
     FallAsleep,
     WakeUp,
 }
@@ -85,14 +88,12 @@ enum GuardShiftEventType {
 #[derive(Debug)]
 struct GuardShiftEvent {
     timestamp: NaiveDateTime,
-    guard_id: usize,
     event_type: GuardShiftEventType,
 }
 
 fn parse_guard_shifts(data: &str) -> Result<Vec<GuardShiftEvent>, &str> {
     let re = Regex::new(r"^\[(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] (?P<shift>(Guard #(?P<id>\d+))|(falls)|(wakes)).*$").unwrap();
     let mut events = Vec::new();
-    let mut guard_id = 0;
     for line in data.lines() {
         let caps = re
             .captures(line)
@@ -104,8 +105,8 @@ fn parse_guard_shifts(data: &str) -> Result<Vec<GuardShiftEvent>, &str> {
         let event_type: GuardShiftEventType;
         if shift.starts_with("Guard") {
             let guard_id_str = caps.name("id").ok_or("id not present")?.as_str();
-            guard_id = guard_id_str.parse().or(Err("Unable to parse guard_id"))?;
-            event_type = GuardShiftEventType::BeginShift;
+            let guard_id = guard_id_str.parse().or(Err("Unable to parse guard_id"))?;
+            event_type = GuardShiftEventType::BeginShift(guard_id);
         } else if shift.starts_with("falls") {
             event_type = GuardShiftEventType::FallAsleep;
         } else if shift.starts_with("wakes") {
@@ -114,7 +115,6 @@ fn parse_guard_shifts(data: &str) -> Result<Vec<GuardShiftEvent>, &str> {
             return Err("Invalid shift format");
         }
         events.push(GuardShiftEvent {
-            guard_id: guard_id,
             timestamp: timestamp,
             event_type: event_type,
         });
