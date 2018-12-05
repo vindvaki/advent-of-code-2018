@@ -1,4 +1,8 @@
+#![recursion_limit = "1024"]
+
 extern crate chrono;
+#[macro_use]
+extern crate error_chain;
 extern crate regex;
 
 use chrono::NaiveDateTime;
@@ -6,6 +10,12 @@ use chrono::Timelike;
 use regex::Regex;
 use std::collections::HashMap;
 use std::io::Read;
+
+mod errors {
+    error_chain!{}
+}
+
+use errors::*;
 
 fn main() {
     let mut data = String::new();
@@ -37,8 +47,13 @@ fn part_2(events: &Vec<GuardShiftEvent>) -> usize {
 
     let (guard_id, _, minute) = guard_minutes
         .iter()
-        .map(|(guard_id, counts)| (guard_id, counts, (0..60_usize).max_by_key(|&i| counts[i]).unwrap()))
-        .max_by_key(|(_guard_id, counts, sleepiest_minute)| counts[*sleepiest_minute])
+        .map(|(guard_id, counts)| {
+            (
+                guard_id,
+                counts,
+                (0..60_usize).max_by_key(|&i| counts[i]).unwrap(),
+            )
+        }).max_by_key(|(_guard_id, counts, sleepiest_minute)| counts[*sleepiest_minute])
         .unwrap();
 
     return guard_id * minute;
@@ -91,28 +106,35 @@ struct GuardShiftEvent {
     event_type: GuardShiftEventType,
 }
 
-fn parse_guard_shifts(data: &str) -> Result<Vec<GuardShiftEvent>, &str> {
-    let re = Regex::new(r"^\[(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] (?P<shift>(Guard #(?P<id>\d+))|(falls)|(wakes)).*$").unwrap();
+fn parse_guard_shifts(data: &str) -> Result<Vec<GuardShiftEvent>> {
+    let re = Regex::new(r"^\[(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2})\] (?P<event>(Guard #(?P<id>\d+))|(falls)|(wakes)).*$").unwrap();
     let mut events = Vec::new();
     for line in data.lines() {
         let caps = re
             .captures(line)
-            .ok_or("Unable to match against regular expression")?;
-        let timestamp_str = caps.name("ts").ok_or("No timestamp")?.as_str();
+            .chain_err(|| "Unable to match against regular expression")?;
+        let timestamp_str = caps.name("ts").chain_err(|| "No timestamp")?.as_str();
         let timestamp = NaiveDateTime::parse_from_str(timestamp_str, "%Y-%m-%d %H:%M")
             .or(Err("Invalid timestamp"))?;
-        let shift = caps.name("shift").ok_or("No shift")?.as_str();
+        let event_str = caps
+            .name("event")
+            .chain_err(|| "Invalid event format")?
+            .as_str();
         let event_type: GuardShiftEventType;
-        if shift.starts_with("Guard") {
-            let guard_id_str = caps.name("id").ok_or("id not present")?.as_str();
-            let guard_id = guard_id_str.parse().or(Err("Unable to parse guard_id"))?;
+        if event_str.starts_with("Guard") {
+            let guard_id = caps
+                .name("id")
+                .chain_err(|| "id not present")?
+                .as_str()
+                .parse()
+                .chain_err(|| "Unable to parse guard_id")?;
             event_type = GuardShiftEventType::BeginShift(guard_id);
-        } else if shift.starts_with("falls") {
+        } else if event_str.starts_with("falls") {
             event_type = GuardShiftEventType::FallAsleep;
-        } else if shift.starts_with("wakes") {
+        } else if event_str.starts_with("wakes") {
             event_type = GuardShiftEventType::WakeUp;
         } else {
-            return Err("Invalid shift format");
+            bail!("This is not supposed to be possible");
         }
         events.push(GuardShiftEvent {
             timestamp: timestamp,
