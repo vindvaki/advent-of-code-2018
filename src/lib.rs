@@ -13,3 +13,32 @@ where
     return result;
 }
 
+pub struct Mat<T: Clone> {
+    rows: usize,
+    cols: usize,
+    data: Vec<T>,
+}
+
+impl<T: Clone> Mat<T> {
+    pub fn new(rows: usize, cols: usize, zero: T) -> Mat<T> {
+        Mat {
+            rows: rows,
+            cols: cols,
+            data: core::iter::repeat(zero).take(rows * cols).collect(),
+        }
+    }
+
+    pub fn get(&self, row: usize, col: usize) -> &T {
+        debug_assert!(row < self.rows && col < self.cols);
+        &self.data[row + col * self.rows]
+    }
+
+    pub fn set(&mut self, row: usize, col: usize, val: T) {
+        debug_assert!(row < self.rows && col < self.cols);
+        self.data[row + col * self.rows] = val;
+    }
+
+    pub fn iter<'a>(&'a self) -> impl Iterator<Item = &'a T> {
+        self.data.iter()
+    }
+}
