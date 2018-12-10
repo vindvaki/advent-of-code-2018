@@ -72,20 +72,14 @@ impl DependencyData {
             remaining.insert(dependent);
             free.insert(dependency);
 
-            if !dependent_to_dependencies.contains_key(&dependent) {
-                dependent_to_dependencies.insert(dependent, HashSet::new());
-            }
             dependent_to_dependencies
-                .get_mut(&dependent)
-                .unwrap()
+                .entry(dependent)
+                .or_insert(HashSet::new())
                 .insert(dependency);
 
-            if !dependency_to_dependents.contains_key(&dependency) {
-                dependency_to_dependents.insert(dependency, HashSet::new());
-            }
             dependency_to_dependents
-                .get_mut(&dependency)
-                .unwrap()
+                .entry(dependency)
+                .or_insert(HashSet::new())
                 .insert(dependent);
         }
         for step in dependent_to_dependencies.keys() {
@@ -115,10 +109,10 @@ impl DependencyData {
         self.free.remove(&step);
 
         let finishes_at = self.time + cost;
-        if !self.in_progress.contains_key(&finishes_at) {
-            self.in_progress.insert(finishes_at, BTreeSet::new());
-        }
-        self.in_progress.get_mut(&finishes_at).unwrap().insert(step);
+        self.in_progress
+            .entry(finishes_at)
+            .or_insert(BTreeSet::new())
+            .insert(step);
         self.busy_count += 1;
         true
     }
