@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 
 pub fn count_by_value<'a, T: 'a, I>(data: I) -> HashMap<T, u32>
 where
@@ -40,5 +41,25 @@ impl<T: Clone> Mat<T> {
 
     pub fn iter<'a>(&'a self) -> impl Iterator<Item = &'a T> {
         self.data.iter()
+    }
+
+    pub fn rows(&self) -> usize {
+        self.rows
+    }
+
+    pub fn cols(&self) -> usize {
+        self.cols
+    }
+}
+
+impl <T: Clone + fmt::Display> fmt::Display for Mat<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for row in 0..self.rows {
+            for col in 0..self.cols {
+                write!(f, "{}", self.get(row, col))?;
+            }
+            write!(f, "\n")?;
+        }
+        Ok(())
     }
 }
