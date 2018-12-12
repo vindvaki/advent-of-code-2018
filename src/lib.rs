@@ -14,6 +14,7 @@ where
     return result;
 }
 
+#[derive(Debug, Clone)]
 pub struct Mat<T: Clone> {
     rows: usize,
     cols: usize,
