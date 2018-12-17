@@ -148,13 +148,31 @@ impl Circle {
 mod tests {
     #[test]
     fn test_part_1() {
-        use part_1;
         use parse_game;
-        assert_eq!(part_1(parse_game("9 players; last marble is worth 25 points").unwrap()), 32);
-        assert_eq!(part_1(parse_game("10 players; last marble is worth 1618 points").unwrap()), 8317);
-        assert_eq!(part_1(parse_game("13 players; last marble is worth 7999 points").unwrap()), 146373);
-        assert_eq!(part_1(parse_game("17 players; last marble is worth 1104 points").unwrap()), 2764);
-        assert_eq!(part_1(parse_game("21 players; last marble is worth 6111 points").unwrap()), 54718);
-        assert_eq!(part_1(parse_game("30 players; last marble is worth 5807 points").unwrap()), 37305);
+        use part_1;
+        assert_eq!(
+            part_1(&parse_game("9 players; last marble is worth 25 points").unwrap()),
+            32
+        );
+        assert_eq!(
+            part_1(&parse_game("10 players; last marble is worth 1618 points").unwrap()),
+            8317
+        );
+        assert_eq!(
+            part_1(&parse_game("13 players; last marble is worth 7999 points").unwrap()),
+            146373
+        );
+        assert_eq!(
+            part_1(&parse_game("17 players; last marble is worth 1104 points").unwrap()),
+            2764
+        );
+        assert_eq!(
+            part_1(&parse_game("21 players; last marble is worth 6111 points").unwrap()),
+            54718
+        );
+        assert_eq!(
+            part_1(&parse_game("30 players; last marble is worth 5807 points").unwrap()),
+            37305
+        );
     }
 }
