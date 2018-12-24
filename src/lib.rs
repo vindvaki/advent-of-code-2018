@@ -5,6 +5,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
+pub mod elfcode;
+
 mod errors {
     error_chain!{
         errors {
