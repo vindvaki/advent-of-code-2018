@@ -46,9 +46,9 @@ seti 9 0 5";
 
     #[test]
     fn test_part_1() {
-        use elfcode::Machine;
+        use aoc2018::elfcode::Machine;
         use part_1;
-        let state: elfcode::Machine = DATA.parse().unwrap();
+        let state: Machine = DATA.parse().unwrap();
         assert_eq!(7, part_1(&state));
     }
 }
