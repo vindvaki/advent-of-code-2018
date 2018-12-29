@@ -8,3 +8,4 @@ authors = ["Hordur Freyr Yngvason <hordurf@gmail.com>"]
 regex = "1"
 chrono = "0.4"
 error-chain = "0.12"
+nalgebra = "0.16"
