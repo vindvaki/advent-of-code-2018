@@ -42,6 +42,10 @@ fn part_2(state_0: &State) -> (usize, usize) {
             boost_min = boost_mid + 1;
         }
     }
+    // need to play it out once more because final boost might not have been boost_min
+    state = state_0.clone();
+    state.boost_immune_system(boost_min);
+    state.resolve();
     (boost_min, state.groups.iter().map(|g| g.unit_count).sum())
 }
 
@@ -373,6 +377,6 @@ Infection:
 801 units each with 4706 hit points (weak to radiation) with an attack that does 116 bludgeoning damage at initiative 1
 4485 units each with 2961 hit points (immune to radiation; weak to fire, cold) with an attack that does 12 slashing damage at initiative 4";
         let state: State = input.parse().unwrap();
-        assert_eq!(1570, part_2(&state));
+        assert_eq!((1570, 51), part_2(&state));
     }
 }
