@@ -60,7 +60,6 @@ fn part_2(events: &Vec<GuardShiftEvent>) -> usize {
 }
 
 fn collect_guard_minutes(events: &Vec<GuardShiftEvent>) -> HashMap<usize, Vec<usize>> {
-    use std::iter::repeat;
     use GuardShiftEventType::*;
     let mut sleep_start_option: Option<NaiveDateTime> = None;
     let mut guard_minutes = HashMap::new();
@@ -74,7 +73,7 @@ fn collect_guard_minutes(events: &Vec<GuardShiftEvent>) -> HashMap<usize, Vec<us
                 if let Some(sleep_start) = sleep_start_option {
                     let mut minutes = guard_minutes
                         .entry(guard_id)
-                        .or_insert(repeat(0).take(60).collect::<Vec<usize>>());
+                        .or_insert(vec![0; 60]);
                     let mut minute_iter = sleep_start;
                     while minute_iter < event.timestamp {
                         minutes[minute_iter.time().minute() as usize] += 1;

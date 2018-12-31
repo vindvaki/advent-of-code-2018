@@ -137,7 +137,7 @@ impl State {
 
         // target selection
         let mut target_pool = HashSet::<usize>::from_iter(0..n);
-        let mut targets: Vec<_> = std::iter::repeat(None).take(n).collect();
+        let mut targets = vec![None; n];
         for &i in by_power.iter() {
             let attacker = &self.groups[i];
             if let Some(&j) = target_pool

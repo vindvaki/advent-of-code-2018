@@ -8,7 +8,7 @@ use std::hash::{Hash, Hasher};
 pub mod elfcode;
 
 mod errors {
-    error_chain!{
+    error_chain! {
         errors {
             ParseValueError(s: String) {
                 description("unable to parse value"),
@@ -65,7 +65,7 @@ impl<T: Clone> Mat<T> {
         Mat {
             rows: rows,
             cols: cols,
-            data: core::iter::repeat(zero).take(rows * cols).collect(),
+            data: vec![zero; rows * cols],
         }
     }
 

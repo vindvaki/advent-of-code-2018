@@ -76,7 +76,7 @@ pub struct Circle {
 impl Circle {
     pub fn new(players: usize) -> Circle {
         Circle {
-            scores: std::iter::repeat(0).take(players).collect(),
+            scores: vec![0; players],
             succ: vec![0],
             pred: vec![0],
             curr_id: 0,
